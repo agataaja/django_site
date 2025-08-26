@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Chaveamento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .chaveamento {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            overflow-x: auto;
+        }
+
+        .round {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .round h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .luta {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            min-width: 200px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .luta:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .ganhador {
+            font-weight: bold;
+            color: green;
+        }
+
+        .perdedor {
+            color: gray;
+        }
+
+        .detalhes {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Chaveamento do Evento</h1>
+    <div class="chaveamento">
+        {% for round, lutas in chaveamento.items %}
+            <div class="round">
+                <h2>{{ round }}</h2>
+                {% for luta in lutas %}
+                    <div class="luta">
+                        <div class="{% if luta.id_atleta1 == luta.id_atleta_ganhador %}ganhador{% else %}perdedor{% endif %}">
+                            Atleta {{ luta.id_atleta1 }}
+                        </div>
+                        <div class="{% if luta.id_atleta2 == luta.id_atleta_ganhador %}ganhador{% else %}perdedor{% endif %}">
+                            Atleta {{ luta.id_atleta2 }}
+                        </div>
+                        <div class="detalhes">
+                            Tapete {{ luta.tapete }} — {{ luta.tipo_vitoria|default:"" }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

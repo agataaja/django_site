@@ -49,8 +49,12 @@ body {
 }
 
 .sidebar .nav-link.active {
-  color: #007bff;
+  font-weight: bold;
+  color: #007bff;  /* azul Bootstrap */
+  border-left: 4px solid #007bff;
+  background-color: #e9ecef;
 }
+
 
 .sidebar .nav-link:hover .feather,
 .sidebar .nav-link.active .feather {
