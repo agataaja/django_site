@@ -36,73 +36,94 @@
 
       <!-- Conteúdo principal -->
       <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pt-4">
-        <h2 class="text-center mb-4">Lutas (Atualização Automática)</h2>
+  <h2 class="text-center mb-4">Lutas (Atualização Automática)</h2>
 
-        <div class="table-responsive">
-          <table id="lutas-tabela" class="table table-striped table-bordered text-center">
-            <thead class="thead-dark">
-              <tr>
-                <th>ID</th>
-                <th>Match Number</th>
-                <th>Mat</th>
-                <th>Age Group</th>
-                <th>Estilo</th>
-                <th>Weight Category</th>
-                <th>Round</th>
-                <th>Atleta 1</th>
-                <th>Atleta 2</th>
-                <th>Ganhador</th>
-                <th>Resultado</th>
-                <th>Tipo Vitória</th>
-                <th>Início</th>
-                <th>Fim</th>
-              </tr>
-            </thead>
-            <tbody id="lutas-body">
-              <!-- Dados preenchidos via JavaScript -->
-            </tbody>
-          </table>
-        </div>
-
-        {% block content %}{% endblock %}
-      </main>
-    </div>
+  <div class="table-responsive">
+    <table id="lutas-tabela" class="table table-hover table-bordered align-middle">
+      <thead class="table-dark text-center">
+        <tr>
+          <th>Match #</th>
+          <th>Mat</th>
+          <th>Categoria</th>
+          <th>Round</th>
+          <th>Atleta 1</th>
+          <th>Atleta 2</th>
+          <th>Ganhador</th>
+          <th>Resultado</th>
+          <th>Início</th>
+          <th>Fim</th>
+        </tr>
+      </thead>
+      <tbody id="lutas-body"></tbody>
+    </table>
   </div>
 
-  <!-- Scripts -->
-  <script>
-    function carregarLutas() {
-      fetch('/lutas-json/')
-        .then(response => response.json())
-        .then(data => {
-          const corpoTabela = document.getElementById('lutas-body');
-          corpoTabela.innerHTML = '';
-          data.lutas.forEach(luta => {
-            const linha = document.createElement('tr');
-            linha.innerHTML = `
-              <td>${luta.id}</td>
-              <td>${luta.numero}</td>
-              <td>${luta.tapete}</td>
-              <td>${luta.audienceName}</td>
-              <td>${luta.sportAlternateName}</td>
-              <td>${luta.weightCategoryName}</td>
-              <td>${luta.round}</td>
-              <td>${luta.id_atleta1}</td>
-              <td>${luta.id_atleta2}</td>
-              <td>${luta.id_atleta_ganhador}</td>
-              <td>${luta.resultado || ''}</td>
-              <td>${luta.tipo_vitoria || ''}</td>
-              <td>${luta.data_inicio || ''}</td>
-              <td>${luta.data_fim || ''}</td>
-            `;
-            corpoTabela.appendChild(linha);
-          });
-        });
-    }
+  {% block content %}{% endblock %}
+</main>
 
-    carregarLutas();
-    setInterval(carregarLutas, 5000);
-  </script>
+<script>
+  function formatDateTime(datetimeStr) {
+    if (!datetimeStr) return "";
+    const dt = new Date(datetimeStr);
+    return dt.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  }
+
+  function flagIcon(flagValue) {
+    return flagValue === 1 ? "✅" : "❌";
+  }
+
+  function carregarLutas() {
+    fetch('/lutas-json/')
+      .then(response => response.json())
+      .then(data => {
+        const corpoTabela = document.getElementById('lutas-body');
+        corpoTabela.innerHTML = '';
+        data.lutas.forEach(luta => {
+          const linha = document.createElement('tr');
+
+          // destacar o ganhador
+          const atleta1 = `
+            <div class="${luta.id_atleta_ganhador === luta.id_atleta1 ? 'fw-bold text-success' : ''}">
+              ID: ${luta.id_atleta1} <br>
+              Rank: ${luta.atleta1_draw_rank || '-'}
+              ${flagIcon(luta.atleta1_flag_injured)}
+              ${flagIcon(luta.atleta1_flag_seeded)}
+            </div>`;
+
+          const atleta2 = `
+            <div class="${luta.id_atleta_ganhador === luta.id_atleta2 ? 'fw-bold text-success' : ''}">
+              ID: ${luta.id_atleta2} <br>
+              Rank: ${luta.atleta2_draw_rank || '-'}
+              ${flagIcon(luta.atleta2_flag_injured)}
+              ${flagIcon(luta.atleta2_flag_seeded)}
+            </div>`;
+
+          linha.innerHTML = `
+            <td class="text-center">${luta.numero || ''}</td>
+            <td class="text-center">${luta.tapete}</td>
+            <td>
+              ${luta.audienceName}<br>
+              <small>${luta.sportAlternateName} - ${luta.weightCategoryName}</small>
+            </td>
+            <td class="text-center">${luta.round}</td>
+            <td>${atleta1}</td>
+            <td>${atleta2}</td>
+            <td class="text-center fw-bold">${luta.id_atleta_ganhador || '-'}</td>
+            <td class="text-center">
+              ${luta.resultado || ''}
+              <br><small>${luta.tipo_vitoria || ''}</small>
+            </td>
+            <td>${formatDateTime(luta.data_inicio)}</td>
+            <td>${formatDateTime(luta.data_fim)}</td>
+          `;
+          corpoTabela.appendChild(linha);
+        });
+      });
+  }
+
+  carregarLutas();
+  setInterval(carregarLutas, 5000);
+</script>
 
   <!-- Bibliotecas externas -->
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>

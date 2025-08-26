@@ -38,8 +38,6 @@ def get_token(ip, client_id, client_secret, api_key):
     response = requests.post(url, params=params)
     data = response.json()
 
-    print(data)
-
     access_token = data["access_token"]
     expires_in = data.get("expires_in", 3600)  # segundos
     expires_at = time.time() + expires_in - 60  # margem de 1 min

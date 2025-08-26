@@ -31,7 +31,7 @@ class Luta(models.Model):
     id_evento = models.IntegerField()
     id_atleta1 = models.IntegerField()
     id_atleta2 = models.IntegerField()
-    flag_finalizado = models.BooleanField()
+    flag_finalizado = models.IntegerField()
     round = models.CharField(max_length=150)
     id_atleta_ganhador = models.IntegerField(null=True, blank=True)
     sportAlternateName = models.CharField(max_length=150)
@@ -39,13 +39,13 @@ class Luta(models.Model):
     audienceName = models.CharField(max_length=150)
     id_classe_peso = models.IntegerField(null=True, blank=True)
 
-    atleta1_flag_injured = models.BooleanField(null=True, blank=True)
-    atleta1_flag_seeded = models.BooleanField(null=True, blank=True)
+    atleta1_flag_injured = models.IntegerField(null=True, blank=True)
+    atleta1_flag_seeded = models.IntegerField(null=True, blank=True)
     atleta1_draw_rank = models.CharField(max_length=10, null=True, blank=True)
     atleta1_RobinRank = models.CharField(max_length=10, null=True, blank=True)
 
-    atleta2_flag_injured = models.BooleanField(null=True, blank=True)
-    atleta2_flag_seeded = models.BooleanField(null=True, blank=True)
+    atleta2_flag_injured = models.IntegerField(null=True, blank=True)
+    atleta2_flag_seeded = models.IntegerField(null=True, blank=True)
     atleta2_draw_rank = models.CharField(max_length=10, null=True, blank=True)
     atleta2_RobinRank = models.CharField(max_length=10, null=True, blank=True)
 
