@@ -1,7 +1,7 @@
-from site1.polls.models import Luta
-from site1.polls.integrations.api_arena import *
-from site1.polls.utils.formatters import *
-from site1.polls.integrations.sge_rest_api import *
+from ..models import Luta
+from ..integrations.api_arena import *
+from ..utils.formatters import format_datetime
+from ..integrations.sge_rest_api import sync_luta_with_remote
 
 
 def handle_webhook(data):
@@ -71,12 +71,14 @@ def save_luta(luta_data, evento_id):
             "sportAlternateName": luta_data.get("sportAlternateName", ""),
             "weightCategoryName": luta_data.get("weightCategoryName", ""),
             "audienceName": luta_data.get("audienceName", ""),
+
             "id_atleta1": get_custom_id(luta_data.get("fighter1PersonId")),
             "atleta1_flag_injured": int(bool(luta_data.get("fighter1IsInjured", 0))),
             "atleta1_flag_seeded": int(bool(luta_data.get("fighter1IsSeeded", 0))),
             "atleta1_draw_rank": luta_data.get("fighter1DrawRank", ""),
             "atleta1_RobinRank": luta_data.get("fighter1RobinRank", ""),
             "atleta1_ranking_point": luta_data.get("fighter1RankingPoint", 0),
+
             "id_atleta2": get_custom_id(luta_data.get("fighter2PersonId")),
             "atleta2_flag_injured": int(bool(luta_data.get("fighter2IsInjured", 0))),
             "atleta2_flag_seeded": int(bool(luta_data.get("fighter2IsSeeded", 0))),
@@ -87,8 +89,8 @@ def save_luta(luta_data, evento_id):
             "tipo_vitoria": luta_data.get("victoryType", ""),
             "numero": luta_data.get("fightNumber", 0),
             "tapete": luta_data.get("matName", ""),
-            "data_inicio": format_datetime(luta_data.get("expectedStartDate")),
-            "data_fim": format_datetime(luta_data.get("completedDate")),
+            "data_inicio": luta_data.get("expectedStartDate"),
+            "data_fim": luta_data.get("completedDate"),
         },
     )
     return luta_obj

@@ -1,4 +1,4 @@
-from site1.polls.integrations.authorization_arena import *
+from ..integrations.authorization_arena import *
 
 
 def get_endpoint_response(headers, endpoint):

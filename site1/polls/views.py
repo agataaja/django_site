@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import WebhookPayload, Luta
-from site1.polls.services.webhook_handler import *
+from .services.webhook_handler import *
 
 
 def index(request):

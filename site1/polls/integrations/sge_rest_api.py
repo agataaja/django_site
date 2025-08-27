@@ -1,4 +1,5 @@
 import requests
+from ..utils.formatters import format_datetime
 
 API_URL = "https://restcbw.bigmidia.com/cbw/api/evento-luta"
 API_HEADERS = {"Content-Type": "application/json"}
@@ -31,13 +32,16 @@ def sync_luta_with_remote(luta_obj):
         "atleta2_draw_rank": luta_obj.atleta2_draw_rank,
         "atleta2_RobinRank": luta_obj.atleta2_RobinRank,
         "atleta2_ranking_point": luta_obj.atleta2_ranking_point,
-        "data_inicio": luta_obj.data_inicio.isoformat() if luta_obj.data_inicio else None,
-        "data_fim": luta_obj.data_fim.isoformat() if luta_obj.data_fim else None,
+        "data_inicio": format_datetime(
+            luta_obj.data_inicio),
+        "data_fim": format_datetime(
+            luta_obj.data_fim)
     }
 
-    r = requests.get(f"{API_URL}/{luta_obj.id}", headers=API_HEADERS)
+    r = requests.get(f"{API_URL}?id={luta_obj.id}", headers=API_HEADERS)
 
     if r.status_code == 200:
         requests.put(f"{API_URL}/{luta_obj.id}", headers=API_HEADERS, json=payload)
+
     else:
         requests.post(API_URL, headers=API_HEADERS, json=payload)
