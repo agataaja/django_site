@@ -1,7 +1,7 @@
 from ..models import Luta
 from ..integrations.api_arena import *
-from ..utils.formatters import format_datetime
 from ..integrations.sge_rest_api import sync_luta_with_remote
+from ..utils.id_request import get_customId_by_fighterId_or_return_0, get_customId_by_personId_or_return_0
 
 
 def handle_webhook(data):
@@ -24,42 +24,50 @@ def process_category(data):
     if not categoria_id:
         return
 
-    fights = get_fights_by_category("1f045f88-ae60-6e78-9005-6db8fc8b090d", categoria_id)
+    category_info = get_weight_category_info_by_its_id(categoria_id)
 
-    for fight in fights:
+    sport_event_id = category_info.get("sportEventId")
+
+    fights = get_all_fights_by_event_id(sport_event_id)
+
+    filtro = [item for item in fights if item.get("SportEventWeightCategoryId") == categoria_id]
+
+    for fight in filtro:
         luta_obj = save_luta(fight, evento_id=143)
-        sync_luta_with_remote(luta_obj)
+        # sync_luta_with_remote(luta_obj)
 
 
 def process_fight(data):
+
     luta_id = data.get("id")
     if not luta_id:
         return
     fight = get_fight(luta_id)
-    luta_obj = save_luta(fight, evento_id=143)
-    sync_luta_with_remote(luta_obj)
+    luta_obj = save_luta(fight, evento_id=14)
+    # sync_luta_with_remote(luta_obj)
 
 
 def process_event(data):
+    print(">>> Iniciando process_event")
+
+    start = time.perf_counter()
+
     sport_event_id = data.get("id")
+    fights = get_all_fights_by_event_id(sport_event_id)
 
-    categeorias = get_weight_categories(sport_event_id)
+    for fight in fights:
 
-    for id_categoria in categeorias.keys():
+        luta_obj = save_luta(fight, evento_id=140)
+        # sync_luta_with_remote(luta_obj)
 
-        fights = get_fights_by_category("1f045f88-ae60-6e78-9005-6db8fc8b090d", id_categoria)
+    end = time.perf_counter()
+    elapsed = end - start
 
-        for fight in fights:
-            luta_obj = save_luta(fight, evento_id=143)
-            sync_luta_with_remote(luta_obj)
+    print(f">>> Finalizou process_event, total de lutas do evento: {len(fights)}")
+    print(f">>> Tempo de execução: {elapsed:.2f} segundos")
 
 
 def save_luta(luta_data, evento_id):
-
-    if luta_data.get("winnerFighterPersonId"):
-        id_ganhador = get_fighter_custom_id(luta_data.get("winnerFighterPersonId"))
-    else:
-        id_ganhador = 0
 
     luta_obj, _ = Luta.objects.update_or_create(
         id=luta_data.get("id") + f"-{evento_id}",
@@ -67,19 +75,19 @@ def save_luta(luta_data, evento_id):
             "id_evento": evento_id,
             "flag_finalizado": int(bool(luta_data.get("isCompleted", 0))),
             "round": luta_data.get("round", ""),
-            "id_atleta_ganhador": id_ganhador,
+            "id_atleta_ganhador": get_customId_by_fighterId_or_return_0(luta_data.get("winnerFighter")),
             "sportAlternateName": luta_data.get("sportAlternateName", ""),
             "weightCategoryName": luta_data.get("weightCategoryName", ""),
             "audienceName": luta_data.get("audienceName", ""),
 
-            "id_atleta1": get_custom_id(luta_data.get("fighter1PersonId")),
+            "id_atleta1": get_customId_by_personId_or_return_0(luta_data.get("fighter1PersonId")),
             "atleta1_flag_injured": int(bool(luta_data.get("fighter1IsInjured", 0))),
             "atleta1_flag_seeded": int(bool(luta_data.get("fighter1IsSeeded", 0))),
             "atleta1_draw_rank": luta_data.get("fighter1DrawRank", ""),
             "atleta1_RobinRank": luta_data.get("fighter1RobinRank", ""),
             "atleta1_ranking_point": luta_data.get("fighter1RankingPoint", 0),
 
-            "id_atleta2": get_custom_id(luta_data.get("fighter2PersonId")),
+            "id_atleta2": get_customId_by_personId_or_return_0(luta_data.get("fighter2PersonId")),
             "atleta2_flag_injured": int(bool(luta_data.get("fighter2IsInjured", 0))),
             "atleta2_flag_seeded": int(bool(luta_data.get("fighter2IsSeeded", 0))),
             "atleta2_draw_rank": luta_data.get("fighter2DrawRank", ""),

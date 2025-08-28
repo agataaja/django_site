@@ -1,5 +1,8 @@
 import requests
 from ..utils.formatters import format_datetime
+import pandas as pd
+from concurrent.futures import ThreadPoolExecutor
+
 
 API_URL = "https://restcbw.bigmidia.com/cbw/api/evento-luta"
 API_HEADERS = {"Content-Type": "application/json"}
@@ -38,10 +41,70 @@ def sync_luta_with_remote(luta_obj):
             luta_obj.data_fim)
     }
 
-    r = requests.get(f"{API_URL}?id={luta_obj.id}", headers=API_HEADERS)
+    r = requests.get(f"{API_URL}/{luta_obj.id}", headers=API_HEADERS)
 
     if r.status_code == 200:
-        requests.put(f"{API_URL}/{luta_obj.id}", headers=API_HEADERS, json=payload)
+
+        print(f'Satus code atual da requisição de get {r}:', r.status_code)
+        s = requests.put(f"{API_URL}/{luta_obj.id}", headers=API_HEADERS, json=payload)
+        print('Satus code de envio do payload:', s.status_code, f'payload: {payload}')
 
     else:
-        requests.post(API_URL, headers=API_HEADERS, json=payload)
+        print(f'Satus code atual da requisição de {r}:', r.status_code)
+        # p = requests.post(API_URL, headers=API_HEADERS, json=payload)
+        p = requests.put(f"{API_URL}/{luta_obj.id}", headers=API_HEADERS, json=payload)
+        print('Satus code de envio do payload:', p.status_code,f'status message: {p.text}', f'payload: {payload}')
+
+
+def fetch_data(base_url, querys, headers, page):
+
+    response = requests.get(f"{base_url}?{querys}page={page}", headers=headers).json()['items']
+    return pd.json_normalize(response)
+
+
+def clean_all_records():
+
+    page_count = requests.get(f"{API_URL}", headers=API_HEADERS).json()["_meta"]["pageCount"]
+    querys = f"&"
+
+    print(page_count)
+
+    with ThreadPoolExecutor() as executor:
+        dfs = executor.map(lambda page: fetch_data(API_URL, querys, API_HEADERS, page), range(1, page_count + 1))
+
+    final_df = pd.concat(dfs, ignore_index=True)
+
+    for _, record in final_df.iterrows():
+
+        id_luta = record['id']
+
+        p = requests.delete(f'{API_URL}/{id_luta}')
+        print(p.status_code, p.text)
+
+
+def request_athlete_photo(id_atleta):
+
+    url = f'https://restcbw.bigmidia.com/gestao/api/atleta/{id_atleta}'
+
+    photo_id = requests.get(url, headers=API_HEADERS).json()['foto']
+
+    photo_url = f'https://sge.cbw.org.br/_uploads/fotoAtleta/{photo_id}'
+
+    return photo_url
+
+
+def get_all_sge_eventos_info():
+
+    headers = {"Content-Type": "application/json"}
+    base_url = "https://restcbw.bigmidia.com/gestao/api/evento"
+    querys = f"?flag_del=0&"
+
+    page_count = requests.get(f"{base_url}{querys}", headers=headers).json()["_meta"]["pageCount"]
+
+    with ThreadPoolExecutor() as executor:
+
+        dfs = executor.map(lambda page: fetch_data(base_url, querys, headers, page), range(1, page_count+1))
+
+    df = pd.concat(dfs, ignore_index=True)
+
+    return df

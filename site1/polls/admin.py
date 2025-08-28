@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Luta, WebhookPayload
+from .models import Luta, WebhookPayload, CredentialsArena, EventosArena, EventosSge
 import json
 
 
@@ -46,6 +46,7 @@ class LutaAdmin(admin.ModelAdmin):
     list_filter = ('sportAlternateName', 'weightCategoryName', 'round', 'tapete', 'audienceName')
     search_fields = ('id_atleta1', 'id_atleta2', 'id_atleta_ganhador')
 
+
 @admin.register(WebhookPayload)
 class WebhookPayloadAdmin(admin.ModelAdmin):
     list_display = ('id', 'received_at', 'short_payload')
@@ -58,3 +59,17 @@ class WebhookPayloadAdmin(admin.ModelAdmin):
         return json.dumps(obj.payload, ensure_ascii=False)
 
     short_payload.short_description = 'Payload'
+
+
+@admin.register(CredentialsArena)
+class CredentialsArenaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'nome_maquina', 'client_id', 'client_secret', 'api_key')
+    list_filter = ('nome_maquina',)
+    search_fields = ('nome_maquina',)
+
+
+@admin.register(EventosSge)
+class EventoSgeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'id_sge', 'local', 'data_inicio', 'data_fim', 'id_tipo', 'descricao', 'escopo', 'audienceName')
+    list_filter = ('local', 'id_tipo', 'escopo', 'audienceName')
+    search_fields = ('escopo', 'descricao')

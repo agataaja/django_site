@@ -25,20 +25,20 @@ def get_fighter_custom_id(fighter_id):
     return get_custom_id(custom['fighter']['personId'])
 
 
-def get_weight_categories(spor_event_id):
+def get_weight_categories_by_sport_event_id(sport_event_id):
 
-    weight_categories = get_endpoint_response(get_headers(), f"weight-category/{spor_event_id}")['weightCategories']
+    weight_categories = get_endpoint_response(get_headers(), f"weight-category/{sport_event_id}")['weightCategories']
     categorias = {}
 
     for category in weight_categories:
         id_categoria = category['id']
         nome = category['shortName']
         categorias[id_categoria] = nome
-
     return categorias
 
 
-def get_fights_by_category(event_id, category_id):
+def get_bracket_fights_by_category(event_id, category_id):
+
     url = f"http://localhost:8080/api/json/fight/{event_id}/bracket/{category_id}"
     r = requests.get(url, headers=get_headers())
     r.raise_for_status()
@@ -51,3 +51,22 @@ def get_fight(fight_id):
     r.raise_for_status()
     return r.json().get("fight", {})
 
+
+def get_all_fights_by_event_id(event_id):
+
+    url = f"http://localhost:8080/api/json/fight/{event_id}"
+    r = requests.get(url, headers=get_headers())
+    r.raise_for_status()
+    return r.json().get("fights", [])
+
+
+def get_all_sport_events_info():
+
+    response = get_endpoint_response(get_headers(), 'sport-event/')
+    return print(response)
+
+
+def get_weight_category_info_by_its_id(sportEventWeightCategoryId):
+
+    response = get_endpoint_response(get_headers(), f'weight-category/get/{sportEventWeightCategoryId}')
+    return response
