@@ -60,10 +60,10 @@ def get_all_fights_by_event_id(event_id):
     return r.json().get("fights", [])
 
 
-def get_all_sport_events_info():
+def get_all_sport_events_info(pk):
 
-    response = get_endpoint_response(get_headers(), 'sport-event/')
-    return print(response)
+    response = get_endpoint_response(get_headers(pk), 'sport-event/')
+    return response
 
 
 def get_weight_category_info_by_its_id(sportEventWeightCategoryId):

@@ -1,5 +1,6 @@
 import requests
 import time
+from ..models import CredentialsArena
 
 
 # Variáveis globais de cache
@@ -7,11 +8,24 @@ _cached_token = None
 _token_expires_at = 0  # timestamp
 
 
-def get_headers():
+def get_db_credentials_by_pk(pk):
 
-    api_key = 'jGpEm51R2k5nYZ6uVtcqjBnBsksrcUhteFfgFXPLhysSiW37he'
-    client_id = 'b020a718926bba9cb4053adcb4cd22fc'
-    client_secret = '89c383a23f21a3f0f33f8ddbe6194b89ec13cbe7e401416875cfdbea3740b3173178250509f28fe22bff23040232e2dd59c7041a907084aa1ecb15f0ddbb7153'
+    credencial_pk = CredentialsArena.objects.get(pk=pk)
+
+    api_key = credencial_pk.api_key
+    client_id = credencial_pk.client_id
+    client_secret = credencial_pk.client_secret
+
+    return api_key, client_id, client_secret
+
+
+def get_headers(pk):
+
+    credentials = get_db_credentials_by_pk(pk)
+
+    api_key = credentials[0]
+    client_id = credentials[1]
+    client_secret = credentials[2]
     ip = 'localhost'
 
     global _cached_token, _token_expires_at

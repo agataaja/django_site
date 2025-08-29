@@ -1,10 +1,10 @@
 from ..models import EventosSge
 from ..integrations.sge_rest_api import get_all_sge_eventos_info
-from ..utils.maps import map_audience_name_by_descricao
+from ..utils.maps import map_audience_name_by_name
 from django.db import transaction
 
 
-def process_eventos():
+def process_eventos_sge():
     df = get_all_sge_eventos_info()
 
     objetos = []
@@ -17,7 +17,9 @@ def process_eventos():
             id_tipo=row['id_tipo'],
             descricao=row['descricao'],
             escopo=row['escopo'],
-            audienceName=map_audience_name_by_descricao(row['descricao'])
+            audienceName=map_audience_name_by_name(row['descricao']),
+            ano = row['ano']
+
         ))
 
     # Use transaction.atomic para garantir integridade
@@ -34,5 +36,6 @@ def process_eventos():
                     "descricao": obj.descricao,
                     "escopo": obj.escopo,
                     "audienceName": obj.audienceName,
+                    "ano": obj.ano
                 }
             )

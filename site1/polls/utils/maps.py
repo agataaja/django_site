@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def map_audience_name_by_descricao(var):
+def map_audience_name_by_name(var):
 
     v = var.lower()
 

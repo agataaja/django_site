@@ -70,6 +70,21 @@ class CredentialsArenaAdmin(admin.ModelAdmin):
 
 @admin.register(EventosSge)
 class EventoSgeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'id_sge', 'local', 'data_inicio', 'data_fim', 'id_tipo', 'descricao', 'escopo', 'audienceName')
-    list_filter = ('local', 'id_tipo', 'escopo', 'audienceName')
+    list_display = ('id', 'id_sge', 'local', 'data_inicio', 'data_fim', 'id_tipo', 'descricao', 'escopo', 'audienceName','ano')
+    list_filter = ('local', 'id_tipo', 'escopo', 'audienceName', 'ano')
     search_fields = ('escopo', 'descricao')
+
+
+@admin.register(EventosArena)
+class EventoArenaAdmin(admin.ModelAdmin):
+    list_display = ("id", "id_arena", "nome_evento", "credencial", "isTeamEvent", "isBeachWrestlingTournament", "audienceName")
+    list_filter = ("credencial", "isTeamEvent", "isBeachWrestlingTournament", "audienceName")
+    search_fields = ("id_arena", "nome_evento")
+
+
+class EventosInline(admin.TabularInline):
+    model = EventosArena
+    extra = 0
+
+
+

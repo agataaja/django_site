@@ -58,7 +58,7 @@ def sync_luta_with_remote(luta_obj):
 
 def fetch_data(base_url, querys, headers, page):
 
-    response = requests.get(f"{base_url}?{querys}page={page}", headers=headers).json()['items']
+    response = requests.get(f"{base_url}?page={page}{querys}", headers=headers).json()['items']
     return pd.json_normalize(response)
 
 
@@ -95,16 +95,16 @@ def request_athlete_photo(id_atleta):
 
 def get_all_sge_eventos_info():
 
-    headers = {"Content-Type": "application/json"}
     base_url = "https://restcbw.bigmidia.com/gestao/api/evento"
-    querys = f"?flag_del=0&"
+    querys = f"&flag_del=0"
 
-    page_count = requests.get(f"{base_url}{querys}", headers=headers).json()["_meta"]["pageCount"]
+    page_count = requests.get(f"{base_url}", headers=API_HEADERS).json()["_meta"]["pageCount"]
 
     with ThreadPoolExecutor() as executor:
 
-        dfs = executor.map(lambda page: fetch_data(base_url, querys, headers, page), range(1, page_count+1))
+        dfs = executor.map(lambda page: fetch_data(base_url, querys, API_HEADERS, page), range(1, page_count+1))
 
     df = pd.concat(dfs, ignore_index=True)
-
+    df["ano"] = pd.to_datetime(df["data_fim"]).dt.year
+    df = df[df['flag_del'] == 0]
     return df

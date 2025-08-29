@@ -16,5 +16,7 @@ urlpatterns = [
     path("credentials/<int:pk>/edit/", views.credentials_edit, name="credentials_edit"),
     path("credentials/<int:pk>/delete/", views.credentials_delete, name="credentials_delete"),
     path('eventos-sge/', views.eventos_sge_list, name='eventos_sge_list'),
-    path('eventos-arena-load/', views.eventos_sge_upload, name='eventos_sge_upload')
+    path('sync_eventos_sge/', views.sync_eventos_sge, name='sync_eventos_sge'),
+    path("credentials/<int:pk>/sync/", views.sync_eventos_arena, name="sync_eventos_arena"),
+    path("eventos-arena/<int:pk>", views.eventos_arena_list, name="eventos_arena_list"),
     ]

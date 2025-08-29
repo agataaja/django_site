@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -6,12 +5,50 @@ from .models import WebhookPayload, CredentialsArena, EventosArena, EventosSge, 
 from .services.webhook_handler import handle_webhook
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CredentialsArenaForm
-from.services.sge_handler import process_eventos
+from.services.sge_handler import process_eventos_sge
+from.services.arena_handler import fetch_eventos_arena
+from django.contrib import messages
+
+
+def sync_eventos_arena(request, pk):
+
+    try:
+        total = fetch_eventos_arena(pk)
+        messages.success(request, f"{total} eventos sincronizados com sucesso!")
+    except Exception as e:
+        messages.error(request, f"Erro ao sincronizar: {str(e)}")
+
+    return redirect("polls:eventos_arena_list", pk=pk)
 
 
 def eventos_sge_list(request):
+
     eventos = EventosSge.objects.all()
-    return render(request, 'eventos/sge_list.html', {'eventos': eventos})
+
+    ano_filtro = request.GET.get('ano')
+    escopo_filtro = request.GET.get('escopo')
+
+    # Filtrar por ano se informado
+    if ano_filtro:
+        eventos = eventos.filter(ano=ano_filtro)
+
+    # Filtrar por escopo se informado
+    if escopo_filtro:
+        eventos = eventos.filter(escopo=escopo_filtro)
+
+    # Opções disponíveis para os filtros
+    escopos = (
+        EventosSge.objects.values_list('escopo', flat=True).distinct().order_by('escopo')
+    )
+    anos = (
+        EventosSge.objects.values_list('ano', flat=True).distinct().order_by('-ano')
+    )
+
+    return render(request, 'eventos/sge_list.html', {
+        'eventos': eventos,
+        'anos': anos,
+        'escopos': escopos
+    })
 
 
 def index(request):
@@ -94,13 +131,28 @@ def credentials_delete(request, pk):
     return render(request, "polls/credentials/confirm_delete.html", {"cred": cred})
 
 
-def eventos_sge_upload(request):
+def sync_eventos_sge(request):
     if request.method == "GET":
-        process_eventos()
-        return redirect("polls:eventos_arena_list")
+        process_eventos_sge()
+        return redirect("polls:eventos_sge_list")
 
     else:
-        return redirect("polls:eventos_arena_list")
+        return redirect("polls:eventos_sge_list")
 
 
+def eventos_arena_list(request, pk):
+    # Primeiro garante que a credencial existe
+    credencial = get_object_or_404(CredentialsArena, pk=pk)
+
+    # Pega todos os eventos associados a essa credencial
+    eventos = EventosArena.objects.filter(credencial=credencial)
+
+    return render(
+        request,
+        "eventos/arena_list.html",
+        {
+            "eventos": eventos,
+            "credencial": credencial  # opcional, para exibir info da credencial na página
+        }
+    )
 

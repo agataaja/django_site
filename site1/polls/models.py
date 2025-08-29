@@ -56,6 +56,7 @@ class EventosSge(models.Model):
     descricao = models.CharField(max_length=150, null=True, blank=True)
     escopo = models.CharField(max_length=50, null=True, blank=True)
     audienceName = models.CharField(max_length=50, null=True, blank=True)
+    ano = models.IntegerField(null=True, blank=True)
 
 
 class CredentialsArena(models.Model):
@@ -72,6 +73,7 @@ class EventosArena(models.Model):
     nome_evento = models.CharField(max_length=100)
     isTeamEvent = models.BooleanField()
     isBeachWrestlingTournament = models.BooleanField()
+    audienceName = models.CharField(max_length=50, null=True, blank=True)
 
     # Relacionamento: uma credencial pode ter vários eventos
     credencial = models.ForeignKey(
@@ -80,5 +82,7 @@ class EventosArena(models.Model):
 
     # Relacionamento N:N com eventos SGE
     eventos_sge = models.ManyToManyField(EventosSge, related_name="eventos_arena")
+
+
 
 
